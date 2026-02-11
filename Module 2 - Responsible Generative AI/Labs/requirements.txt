@@ -8,7 +8,7 @@ langchain==0.3.25
 langchain-aws==0.2.23
 langchain-experimental==0.3.4
 langchain-community==0.3.25
-langchain-core==0.3.60
+langchain-core==1.2.11
 langchain-text-splitters==0.3.8
 langsmith==0.3.42
 boto3==1.38.16
