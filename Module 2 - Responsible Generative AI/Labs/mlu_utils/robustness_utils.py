@@ -180,7 +180,7 @@ def create_agent_with_and_without_guardrails(model_id, guardrailId):
     
     
     chat_no_guardrails = ChatBedrockConverse(
-    model_id=model_id,
+    model=model_id,
     temperature=0.0,
     max_tokens=1000,
     )
@@ -195,7 +195,7 @@ def create_agent_with_and_without_guardrails(model_id, guardrailId):
 
     # Agent with guardrails
     chat_with_guardrails = ChatBedrockConverse(
-    model_id=model_id,
+    model=model_id,
     temperature=0.0,
     max_tokens=1000,
     guardrails={

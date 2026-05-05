@@ -1,0 +1,9 @@
+transformers
+torch
+langchain==0.3.25
+langchain-aws==0.2.23
+langchain-community==0.3.25
+langchain-core==1.2.11
+boto3==1.38.16
+botocore==1.38.16
+datasets==3.6.0
