@@ -3,4 +3,4 @@ langchain-aws==1.4.1
 pypdfium2==4.30.0
 igraph==0.11.8
 plotly==6.0.1
-pillow==11.2.1
+pillow==12.2.0
