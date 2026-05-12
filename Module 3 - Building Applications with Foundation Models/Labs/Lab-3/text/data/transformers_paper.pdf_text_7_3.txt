@@ -1,9 +1,0 @@
- a BLEU score of 41.0,
-outperforming all of the previously published single models, at less than 1/4 the training cost of the
-previous state-of-the-art model. The Transformer (big) model trained for English-to-French used
-dropout rate Pdrop = 0.1, instead of 0.3.
-For the base models, we used a single model obtained by averaging the last 5 checkpoints, which
-were written at 10-minute intervals. For the big models, we averaged the last 20 checkpoints. We
-used beam search with a beam size of 4 and length penalty α = 0.6 [31]. These hyperparameters
-were chosen after experimentation on the development set. We set the maximum output length during
-inference to input length + 50, but terminate early

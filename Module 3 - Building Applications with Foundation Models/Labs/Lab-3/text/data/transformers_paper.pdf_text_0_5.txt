@@ -1,6 +1,0 @@
-ient inference and visualizations. Lukasz and Aidan spent countless long days designing various parts of and
-implementing tensor2tensor, replacing our earlier codebase, greatly improving results and massively accelerating
-our research.
-†Work performed while at Google Brain.
-‡Work performed while at Google Research.
-31st Conference on Neural Information Processing Systems (NIPS 2017), Long Beach, CA, USA.

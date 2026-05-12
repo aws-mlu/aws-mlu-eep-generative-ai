@@ -1,9 +1,0 @@
-e. Self-attention has been
-used successfully in a variety of tasks including reading comprehension, abstractive summarization,
-textual entailment and learning task-independent sentence representations [4, 22, 23, 19].
-End-to-end memory networks are based on a recurrent attention mechanism instead of sequence-
-aligned recurrence and have been shown to perform well on simple-language question answering and
-language modeling tasks [28].
-To the best of our knowledge, however, the Transformer is the ﬁrst transduction model relying
-entirely on self-attention to compute representations of its input and output without using sequence-
-aligned RNNs or convolution. In the following sections, we will de

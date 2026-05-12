@@ -13,3 +13,4 @@ PyPDF2==3.0.1
 ddgs
 unstructured==0.18.18
 pypdfium2
+xmltodict

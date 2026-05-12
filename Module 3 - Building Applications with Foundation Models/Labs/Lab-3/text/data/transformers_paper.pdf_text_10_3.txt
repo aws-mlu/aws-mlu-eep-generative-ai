@@ -1,9 +1,0 @@
-[29] Ilya Sutskever, Oriol Vinyals, and Quoc VV Le. Sequence to sequence learning with neural
-networks. In Advances in Neural Information Processing Systems, pages 3104–3112, 2014.
-[30] Christian Szegedy, Vincent Vanhoucke, Sergey Ioffe, Jonathon Shlens, and Zbigniew Wojna.
-Rethinking the inception architecture for computer vision. CoRR, abs/1512.00567, 2015.
-[31] Yonghui Wu, Mike Schuster, Zhifeng Chen, Quoc V Le, Mohammad Norouzi, Wolfgang
-Macherey, Maxim Krikun, Yuan Cao, Qin Gao, Klaus Macherey, et al. Google’s neural machine
-translation system: Bridging the gap between human and machine translation. arXiv preprint
-arXiv:1609.08144, 2016.
-[32] Jie Zhou, Ying Cao, Xuguang Wang, Peng Li, a

@@ -1,5 +1,0 @@
-ads and the attention key and value dimensions,
-keeping the amount of computation constant, as described in Section 3.2.2. While single-head
-attention is 0.9 BLEU worse than the best setting, quality also drops off with too many heads.
-5We used values of 2.8, 3.7, 6.0 and 9.5 TFLOPS for K80, K40, M40 and P100, respectively.
-8

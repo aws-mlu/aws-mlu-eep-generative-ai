@@ -14,7 +14,7 @@ from langchain_core.messages import HumanMessage
 from langchain_aws.chat_models import ChatBedrock
 from langchain_aws import ChatBedrockConverse
 from langchain_core.tools import tool
-from langchain.agents import create_tool_calling_agent, AgentExecutor
+from langgraph.prebuilt import create_react_agent
 import boto3
 
 NOVA_PRO_MODEL_ID = "amazon.nova-pro-v1:0"
@@ -153,64 +153,67 @@ def find_number_of_times_no_financial_advice(response_outputs):
 
     return number_of_times_no_financial_advice
 
-def create_agent_with_and_without_guardrails(model_id, guardrailId):    
+
+class AgentExecutorCompat:
+    """Wrapper around create_react_agent to maintain the old .invoke({"input": ...}) -> {"output": ...} interface."""
+
+    def __init__(self, agent):
+        self._agent = agent
+
+    def invoke(self, inputs):
+        user_input = inputs.get("input", "")
+        if isinstance(user_input, set):
+            user_input = next(iter(user_input))
+        result = self._agent.invoke({"messages": [("human", str(user_input))]})
+        # Extract the final AI message content
+        messages = result.get("messages", [])
+        output = ""
+        for msg in reversed(messages):
+            if hasattr(msg, "content") and msg.type == "ai":
+                output = msg.content
+                break
+        return {"output": output}
+
+
+def create_agent_with_and_without_guardrails(model_id, guardrailId):
     @tool
     def multiply(x: float, y: float) -> float:
         """Multiply 'x' times 'y'."""
         return x * y
-    
+
     @tool
     def exponentiate(x: float, y: float) -> float:
         """Raise 'x' to the 'y'."""
         return x**y
-    
+
     @tool
     def add(x: float, y: float) -> float:
         """Add 'x' and 'y'."""
         return x + y
-    
+
     tools = [multiply, exponentiate, add]
 
-    prompt = ChatPromptTemplate.from_messages([
-        ("system", "you're a helpful assistant"), 
-        ("human", "{input}"), 
-        ("placeholder", "{agent_scratchpad}"),
-    ])
-    
-    
-    
+    # Agent without guardrails
     chat_no_guardrails = ChatBedrockConverse(
-    model=model_id,
-    temperature=0.0,
-    max_tokens=1000,
+        model=model_id,
+        temperature=0.0,
+        max_tokens=1000,
     )
-    '''
-    chat_no_guardrails.provider_stop_sequence_key_name_map = {'anthropic': 'stop_sequences', 'amazon': 'stopSequences',
-                                                       'ai21': 'stop_sequences', 'cohere': 'stop_sequences',
-                                                       'mistral': 'stop'}
-    '''
-    agent_no_guardrails = create_tool_calling_agent(chat_no_guardrails, tools, prompt)
-    agent_executor_no_guardrails = AgentExecutor(agent=agent_no_guardrails, tools=tools, verbose=False)
-
+    agent_no_guardrails = create_react_agent(chat_no_guardrails, tools)
+    agent_executor_no_guardrails = AgentExecutorCompat(agent_no_guardrails)
 
     # Agent with guardrails
     chat_with_guardrails = ChatBedrockConverse(
-    model=model_id,
-    temperature=0.0,
-    max_tokens=1000,
-    guardrails={
-        'guardrailIdentifier': guardrailId,
-        'guardrailVersion': '2',
-        'trace': 'enabled'
-    },
+        model=model_id,
+        temperature=0.0,
+        max_tokens=1000,
+        guardrails={
+            "guardrailIdentifier": guardrailId,
+            "guardrailVersion": "2",
+            "trace": "enabled",
+        },
     )
-    '''    
-    chat_with_guardrails.provider_stop_sequence_key_name_map = {'anthropic': 'stop_sequences', 
-                                                                'amazon': 'stopSequences',
-                                                                'ai21': 'stop_sequences',
-                                                                'cohere': 'stop_sequences',
-                                                                'mistral': 'stop'}
-    '''
-    agent_with_guardrails = create_tool_calling_agent(chat_with_guardrails, tools, prompt)
-    agent_executor_with_guardrails = AgentExecutor(agent=agent_with_guardrails, tools=tools, verbose=False)
+    agent_with_guardrails = create_react_agent(chat_with_guardrails, tools)
+    agent_executor_with_guardrails = AgentExecutorCompat(agent_with_guardrails)
+
     return agent_executor_with_guardrails, agent_executor_no_guardrails

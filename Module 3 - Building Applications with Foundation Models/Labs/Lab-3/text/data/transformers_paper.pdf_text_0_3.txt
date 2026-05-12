@@ -1,9 +1,0 @@
-l networks
-in particular, have been ﬁrmly established as state of the art approaches in sequence modeling and
-transduction problems such as language modeling and machine translation [29, 2, 5]. Numerous
-efforts have since continued to push the boundaries of recurrent language models and encoder-decoder
-architectures [31, 21, 13].
-∗Equal contribution. Listing order is random. Jakob proposed replacing RNNs with self-attention and started
-the effort to evaluate this idea. Ashish, with Illia, designed and implemented the ﬁrst Transformer models and
-has been crucially involved in every aspect of this work. Noam proposed scaled dot-product attention, multi-head
-attention and the parameter-free pos

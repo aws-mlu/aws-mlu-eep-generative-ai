@@ -1,9 +1,0 @@
-s to vectors of dimension dmodel. We also use the usual learned linear transfor-
-mation and softmax function to convert the decoder output to predicted next-token probabilities. In
-our model, we share the same weight matrix between the two embedding layers and the pre-softmax
-linear transformation, similar to [24]. In the embedding layers, we multiply those weights by √dmodel.
-3.5
-Positional Encoding
-Since our model contains no recurrence and no convolution, in order for the model to make use of the
-order of the sequence, we must inject some information about the relative or absolute position of the
-tokens in the sequence. To this end, we add "positional encodings" to the input embeddings at

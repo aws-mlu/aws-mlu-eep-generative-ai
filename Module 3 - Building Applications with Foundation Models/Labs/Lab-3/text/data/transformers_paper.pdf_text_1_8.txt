@@ -1,8 +1,0 @@
-es of Figure 1,
-respectively.
-3.1
-Encoder and Decoder Stacks
-Encoder:
-The encoder is composed of a stack of N = 6 identical layers. Each layer has two
-sub-layers. The ﬁrst is a multi-head self-attention mechanism, and the second is a simple, position-
-2

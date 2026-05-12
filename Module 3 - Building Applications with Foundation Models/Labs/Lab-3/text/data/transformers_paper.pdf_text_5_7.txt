@@ -1,2 +1,0 @@
-nsidering only a neighborhood of size r in
-6

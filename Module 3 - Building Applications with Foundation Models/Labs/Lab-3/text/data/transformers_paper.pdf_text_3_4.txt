@@ -1,8 +1,0 @@
-nal values, as
-depicted in Figure 2.
-Multi-head attention allows the model to jointly attend to information from different representation
-subspaces at different positions. With a single attention head, averaging inhibits this.
-4To illustrate why the dot products get large, assume that the components of q and k are independent random
-variables with mean 0 and variance 1. Then their dot product, q · k = Pdk
-i=1 qiki, has mean 0 and variance dk.
-4

@@ -1,9 +1,0 @@
- backward signals have to
-traverse in the network. The shorter these paths between any combination of positions in the input
-and output sequences, the easier it is to learn long-range dependencies [11]. Hence we also compare
-the maximum path length between any two input and output positions in networks composed of the
-different layer types.
-As noted in Table 1, a self-attention layer connects all positions with a constant number of sequentially
-executed operations, whereas a recurrent layer requires O(n) sequential operations. In terms of
-computational complexity, self-attention layers are faster than recurrent layers when the sequence
-length n is smaller than the representation dimensionali

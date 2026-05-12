@@ -1,8 +1,0 @@
- positions in the network. Convolutional layers are generally more expensive than
-recurrent layers, by a factor of k. Separable convolutions [6], however, decrease the complexity
-considerably, to O(k · n · d + n · d2). Even with k = n, however, the complexity of a separable
-convolution is equal to the combination of a self-attention layer and a point-wise feed-forward layer,
-the approach we take in our model.
-As side beneﬁt, self-attention could yield more interpretable models. We inspect attention distributions
-from our models and present and discuss examples in the appendix. Not only do individual attention
-heads clearly learn to perform different tasks, many appear to exhibit behavior rel

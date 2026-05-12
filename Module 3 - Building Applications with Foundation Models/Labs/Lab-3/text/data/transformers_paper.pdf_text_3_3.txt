@@ -1,9 +1,0 @@
-ad Attention
-Instead of performing a single attention function with dmodel-dimensional keys, values and queries,
-we found it beneﬁcial to linearly project the queries, keys and values h times with different, learned
-linear projections to dk, dk and dv dimensions, respectively. On each of these projected versions of
-queries, keys and values we then perform the attention function in parallel, yielding dv-dimensional
-output values. These are concatenated and once again projected, resulting in the ﬁnal values, as
-depicted in Figure 2.
-Multi-head attention allows the model to jointly attend to information from different representation
-subspaces at different positions. With a single attention head

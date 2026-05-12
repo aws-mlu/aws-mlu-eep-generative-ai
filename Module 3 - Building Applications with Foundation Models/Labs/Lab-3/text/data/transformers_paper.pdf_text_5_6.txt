@@ -1,7 +1,0 @@
-ires O(n) sequential operations. In terms of
-computational complexity, self-attention layers are faster than recurrent layers when the sequence
-length n is smaller than the representation dimensionality d, which is most often the case with
-sentence representations used by state-of-the-art models in machine translations, such as word-piece
-[31] and byte-pair [25] representations. To improve computational performance for tasks involving
-very long sequences, self-attention could be restricted to considering only a neighborhood of size r in
-6

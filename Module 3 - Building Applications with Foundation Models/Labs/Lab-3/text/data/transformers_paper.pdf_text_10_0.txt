@@ -1,9 +1,0 @@
-[21] Minh-Thang Luong, Hieu Pham, and Christopher D Manning. Effective approaches to attention-
-based neural machine translation. arXiv preprint arXiv:1508.04025, 2015.
-[22] Ankur Parikh, Oscar Täckström, Dipanjan Das, and Jakob Uszkoreit. A decomposable attention
-model. In Empirical Methods in Natural Language Processing, 2016.
-[23] Romain Paulus, Caiming Xiong, and Richard Socher. A deep reinforced model for abstractive
-summarization. arXiv preprint arXiv:1705.04304, 2017.
-[24] Oﬁr Press and Lior Wolf. Using the output embedding to improve language models. arXiv
-preprint arXiv:1608.05859, 2016.
-[25] Rico Sennrich, Barry Haddow, and Alexandra Birch. Neural machine translation of rare words

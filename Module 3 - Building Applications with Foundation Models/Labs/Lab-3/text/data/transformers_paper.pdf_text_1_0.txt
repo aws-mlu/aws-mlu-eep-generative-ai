@@ -1,8 +1,0 @@
-Recurrent models typically factor computation along the symbol positions of the input and output
-sequences. Aligning the positions to steps in computation time, they generate a sequence of hidden
-states ht, as a function of the previous hidden state ht−1 and the input for position t. This inherently
-sequential nature precludes parallelization within training examples, which becomes critical at longer
-sequence lengths, as memory constraints limit batching across examples. Recent work has achieved
-signiﬁcant improvements in computational efﬁciency through factorization tricks [18] and conditional
-computation [26], while also improving model performance in case of the latter. The fundamental
-co

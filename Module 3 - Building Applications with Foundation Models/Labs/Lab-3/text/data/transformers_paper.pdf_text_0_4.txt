@@ -1,7 +1,0 @@
-ed and implemented the ﬁrst Transformer models and
-has been crucially involved in every aspect of this work. Noam proposed scaled dot-product attention, multi-head
-attention and the parameter-free position representation and became the other person involved in nearly every
-detail. Niki designed, implemented, tuned and evaluated countless model variants in our original codebase and
-tensor2tensor. Llion also experimented with novel model variants, was responsible for our initial codebase, and
-efﬁcient inference and visualizations. Lukasz and Aidan spent countless long days designing various parts of and
-implementing tensor2tensor, replacing our earlier codebase, greatly improving results and m

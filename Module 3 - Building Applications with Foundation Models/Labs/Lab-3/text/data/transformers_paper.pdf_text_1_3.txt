@@ -1,7 +1,0 @@
-he goal of reducing sequential computation also forms the foundation of the Extended Neural GPU
-[20], ByteNet [15] and ConvS2S [8], all of which use convolutional neural networks as basic building
-block, computing hidden representations in parallel for all input and output positions. In these models,
-the number of operations required to relate signals from two arbitrary input or output positions grows
-in the distance between positions, linearly for ConvS2S and logarithmically for ByteNet. This makes
-it more difﬁcult to learn dependencies between distant positions [11]. In the Transformer this is
-reduced to a constant number of operations, albeit at the cost of reduced effective resolution du
