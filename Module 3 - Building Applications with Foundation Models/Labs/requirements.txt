@@ -7,7 +7,7 @@ langchain==0.3.19
 langchain-aws==0.2.10
 langchain-experimental==0.3.4
 wikipedia==1.4.0
-pypdf==6.10.2
+pypdf==6.15.0
 PyMuPDF==1.25.5
 PyPDF2==3.0.1
 ddgs
