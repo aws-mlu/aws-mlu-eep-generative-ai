@@ -2,7 +2,7 @@ import ipywidgets as widgets
 from IPython.display import display, HTML, Markdown
 import pandas as pd
 from langchain_core.output_parsers import StrOutputParser
-from langchain.prompts import PromptTemplate
+from langchain_core.prompts import PromptTemplate
 
 def create_rag_comparison_ui(retriever, bedrock_llm):
     # Apply styling

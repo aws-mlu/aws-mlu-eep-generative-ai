@@ -2,7 +2,6 @@ from typing import Any, Dict, List, Optional, Sequence, Union
 
 from langchain_core.callbacks import CallbackManagerForLLMRun
 from langchain_core.language_models.chat_models import BaseChatModel
-from langchain_core.memory import BaseMemory
 from langchain_core.chat_history import BaseChatMessageHistory, InMemoryChatMessageHistory
 from langchain_core.messages import (
     AIMessage,

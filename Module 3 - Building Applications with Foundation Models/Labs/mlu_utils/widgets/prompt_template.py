@@ -1,7 +1,7 @@
 import re
 import ipywidgets as widgets
 from IPython.display import display, Markdown, HTML
-from langchain.prompts import PromptTemplate
+from langchain_core.prompts import PromptTemplate
 
 def create_prompt_interface(bedrock_llm):
     # Apply minimal but effective styling
