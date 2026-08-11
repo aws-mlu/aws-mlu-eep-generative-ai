@@ -9,7 +9,6 @@ import os, shutil
 import time
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate
-from langchain_community.chat_models import BedrockChat
 from langchain_core.messages import HumanMessage
 from langchain_aws.chat_models import ChatBedrock
 from langchain_aws import ChatBedrockConverse
