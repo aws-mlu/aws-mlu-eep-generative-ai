@@ -11,6 +11,7 @@ class Quiz:
     
     def display(self):
         """Display this question as a simple but visually appealing widget"""
+        import time
         import ipywidgets as widgets
         from IPython.display import display, clear_output, HTML
         
@@ -242,6 +243,8 @@ class Quiz:
         main_container.layout.max_width = '700px'  # Set a maximum width
         
         # Display the quiz widget
+        # Small delay to prevent race condition between kernel comm and frontend model registration
+        time.sleep(0.5)
         display(main_container)
 
 
