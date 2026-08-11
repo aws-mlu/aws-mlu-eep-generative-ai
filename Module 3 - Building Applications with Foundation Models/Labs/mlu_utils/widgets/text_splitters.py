@@ -1,11 +1,11 @@
 import ipywidgets as widgets
 from IPython.display import display, HTML
 import random
-from langchain.text_splitter import (
+from langchain_text_splitters import (
     RecursiveCharacterTextSplitter,
     CharacterTextSplitter,
 )
-from langchain.docstore.document import Document
+from langchain_core.documents import Document
 
 def create_text_splitter_widget():
     # Apply minimal styling

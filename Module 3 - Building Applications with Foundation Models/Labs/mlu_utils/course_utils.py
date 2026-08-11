@@ -4,7 +4,7 @@ import pandas as pd
 import os
 import os.path
 from os import path
-from IPython.core.display import display, HTML
+from IPython.display import display, HTML
 import codecs
 
 ######################################
