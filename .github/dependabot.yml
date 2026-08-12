@@ -1,0 +1,102 @@
+
+# .github/dependabot.yml
+# Dependabot configuration for aws-mlu-eep-generative-ai
+# Security updates only — no routine version bumps
+# PRs require manual review and merge (no auto-merge)
+
+version: 2
+updates:
+  # ============================================================
+  # Module 1 - Fundamentals of Generative AI
+  # ============================================================
+
+  - package-ecosystem: "pip"
+    directory: "/Module 1 - Fundamentals of Generative AI/Labs"
+    schedule:
+      interval: "weekly"
+      day: "friday"
+    open-pull-requests-limit: 5
+    versioning-strategy: "lockfile-only"
+    labels:
+      - "dependencies"
+      - "security"
+      - "module-1"
+    commit-message:
+      prefix: "security(mod1)"
+    # Only allow security updates — ignore all non-security version bumps
+    ignore:
+      - dependency-name: "*"
+        update-types:
+          - "version-update:semver-major"
+          - "version-update:semver-minor"
+          - "version-update:semver-patch"
+
+  # ============================================================
+  # Module 2 - Responsible Generative AI
+  # ============================================================
+
+  - package-ecosystem: "pip"
+    directory: "/Module 2 - Responsible Generative AI/Labs"
+    schedule:
+      interval: "weekly"
+      day: "friday"
+    open-pull-requests-limit: 5
+    versioning-strategy: "lockfile-only"
+    labels:
+      - "dependencies"
+      - "security"
+      - "module-2"
+    commit-message:
+      prefix: "security(mod2)"
+    ignore:
+      - dependency-name: "*"
+        update-types:
+          - "version-update:semver-major"
+          - "version-update:semver-minor"
+          - "version-update:semver-patch"
+
+  # ============================================================
+  # Module 3 - Building Applications with Foundation Models
+  # ============================================================
+
+  - package-ecosystem: "pip"
+    directory: "/Module 3 - Building Applications with Foundation Models/Labs"
+    schedule:
+      interval: "weekly"
+      day: "friday"
+    open-pull-requests-limit: 5
+    versioning-strategy: "lockfile-only"
+    labels:
+      - "dependencies"
+      - "security"
+      - "module-3"
+    commit-message:
+      prefix: "security(mod3)"
+    ignore:
+      - dependency-name: "*"
+        update-types:
+          - "version-update:semver-major"
+          - "version-update:semver-minor"
+          - "version-update:semver-patch"
+
+  # ============================================================
+  # GitHub Actions
+  # ============================================================
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "friday"
+    labels:
+      - "dependencies"
+      - "ci"
+    commit-message:
+      prefix: "ci"
+    ignore:
+      - dependency-name: "*"
+        update-types:
+          - "version-update:semver-major"
+          - "version-update:semver-minor"
+          - "version-update:semver-patch"
+
