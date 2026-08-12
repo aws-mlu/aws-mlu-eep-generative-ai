@@ -205,4 +205,5 @@ def create_rag_comparison_ui(retriever, bedrock_llm):
     ))
     
     # Display the UI
+    import time; time.sleep(0.5)  # Prevent widget race condition
     display(main_layout)

@@ -293,6 +293,8 @@ class SimpleChatbot:
     
     def display(self):
         """Display the chatbot interface and show welcome message."""
+        import time
+        time.sleep(0.5)  # Prevent race condition with frontend widget model registration
         display(self.chat_interface)
         
         # Welcome message
@@ -717,6 +719,8 @@ class ChatbotwithPdfSupport:
     
     def display(self):
         """Display the chatbot interface and show welcome message."""
+        import time
+        time.sleep(0.5)  # Prevent race condition with frontend widget model registration
         display(self.chat_interface)
         
         # Welcome message
