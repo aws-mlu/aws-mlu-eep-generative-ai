@@ -1,10 +1,16 @@
 import ipywidgets as widgets
 from IPython.display import display, clear_output, Markdown, HTML
 import pandas as pd
-from langchain_core.prompts import PromptTemplate
-from langchain_core.output_parsers import StrOutputParser
-from langchain_core.runnables import RunnablePassthrough, RunnableParallel
+from dataclasses import dataclass
+from mlu_utils.strands_utils import ask_llm
 import warnings
+
+
+@dataclass
+class PromptStep:
+    """A prompt template string plus the variables it uses."""
+    template: str
+    input_variables: list
 
 # Assuming bedrock_llm is already defined in your environment
 warnings.filterwarnings("ignore")
@@ -48,7 +54,7 @@ def create_sequential_chain_builder(llm):
     class SequentialChainBuilder:
         def __init__(self, llm):
             self.llm = llm
-            self.chains = []  # Will store runnable chains
+            self.chains = []  # Will store chain step functions
             self.chain_names = []
             self.chain_prompts = []  # Store prompt templates
             self.chain_output_keys = []  # Store output keys
@@ -476,13 +482,11 @@ def create_sequential_chain_builder(llm):
                         display(HTML("<div style='color:#e74c3c; font-weight:500;'>Your prompt template must use at least one of the available variables.</div>"))
                     return
                 
-                prompt = PromptTemplate(
-                    template=template,
-                    input_variables=used_vars
-                )
+                prompt = PromptStep(template=template, input_variables=used_vars)
                 
-                # Create a runnable chain
-                chain = prompt | self.llm | StrOutputParser()
+                # Each chain step is a plain Python function: format the prompt, call a Strands agent
+                def chain(inputs, prompt=prompt):
+                    return ask_llm(self.llm, prompt.template.format(**inputs))
                 
                 self.chains.append(chain)
                 self.chain_names.append(name)
@@ -632,7 +636,7 @@ def create_sequential_chain_builder(llm):
                         chain_input_dict = {k: result[k] for k in chain_inputs}
                         
                         # Run the chain and store its output
-                        chain_output = chain.invoke(chain_input_dict)
+                        chain_output = chain(chain_input_dict)
                         result[output_key] = chain_output
                         
                         # Show progress

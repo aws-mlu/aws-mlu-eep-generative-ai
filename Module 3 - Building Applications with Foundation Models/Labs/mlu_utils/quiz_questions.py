@@ -250,12 +250,12 @@ class Quiz:
 
 lab1_question1 = Quiz(
     question={
-        "question": "Which type of module would you use if you wanted the response of the LLM formatted as a JSON.",
+        "question": "In Strands Agents, which approach would you use if you wanted the response of the LLM returned as a validated JSON-like object?",
         "options": [
-            "TextSplitter",
-            "DocumentLoader",
-            "PromptTemplate",
-            "OutputParser",
+            "A text splitter",
+            "A document loader",
+            "A prompt template",
+            "Structured output with a Pydantic model (structured_output_model)",
         ],
         "correctIndex": 3,
     }
@@ -263,12 +263,12 @@ lab1_question1 = Quiz(
 
 lab1_question2 = Quiz(
     question={
-        "question": "Which of the following modules CANNOT be used to define a chain?",
+        "question": "Which of the following CANNOT be used to define a chain of LLM calls with Strands Agents?",
         "options": [
             "PyPDF",
-            "LCEL",
-            "LLMChain",
-            "SequentialChain",
+            "Plain Python functions that call agents in sequence",
+            "Agents with different system prompts passing outputs to each other",
+            "A Strands multi-agent Graph",
         ],
         "correctIndex": 0,
     }
@@ -277,11 +277,11 @@ lab1_question2 = Quiz(
 
 lab2_question1 = Quiz(
     question={
-        "question": "Which of the following types of memory is suitable when dealing with long conversations or large paragraphs or text?",
+        "question": "In Strands, which conversation manager is best suited for long conversations or large amounts of text, while still keeping the context of earlier turns?",
         "options": [
-            "SimpleMemory",
-            "ConversationalBufferMemory",
-            "ConversationalSummaryMemory",
+            "NullConversationManager",
+            "SlidingWindowConversationManager",
+            "SummarizingConversationManager",
             "None of the above",
         ],
         "correctIndex": 2,
@@ -369,14 +369,14 @@ lab4_question1 = Quiz(
 
 lab4_question2 = Quiz(
     question={
-        "question": "What does ReAct stand for?",
+        "question": "On every cycle of the Strands agent loop, what does the model receive?",
         "options": [
-            "Read And Cut",
-            "React and Act",
-            "Reason and Act",
-            "Ready the Action",
+            "Only the latest user message",
+            "The system prompt, the conversation history (agent.messages), and the tool specifications (name, description, and input schema of each tool)",
+            "The system prompt and the Python code that implements each tool",
+            "The tool specifications and only the result of the last tool call",
         ],
-        "correctIndex": 2,
+        "correctIndex": 1,
     }
 )
 
@@ -430,7 +430,7 @@ lab5b_question2 = Quiz(
 
 lab5c_question1 = Quiz(
     question={
-        "question": "Why are we using the Titan models in this lab?", "options":[
+        "question": "Why are we using the Stability AI model in this lab?", "options":[
             "Text Generation",
             "Image Generation",
             "Logical Reasoning",

@@ -1,15 +1,15 @@
 import ipywidgets as widgets
 from IPython.display import display, clear_output
-from langchain_core.prompts import ChatPromptTemplate
-from langchain_core.output_parsers import StrOutputParser
-from mlu_utils.langchain_modules.memory_modules import ConversationBufferMemory
-from langchain_aws import ChatBedrockConverse
+import boto3
+from strands import Agent
+from strands.agent.conversation_manager import NullConversationManager
+from strands.models import BedrockModel
 import PyPDF2
 import io
 
 class SimpleChatbot:
     """
-    A simple chatbot class using AWS Bedrock and LangChain.
+    A simple chatbot class using AWS Bedrock and Strands Agents.
     
     This class creates a user-friendly chatbot interface with:
     - System message customization
@@ -30,18 +30,14 @@ class SimpleChatbot:
         self.default_temperature = default_temperature
         self.default_max_tokens = default_max_tokens
         
-        # Initialize LLM
-        self.llm = ChatBedrockConverse(
-            model=self.model_id,
-            temperature=self.default_temperature,
-            max_tokens=None if default_max_tokens == 0 else default_max_tokens
+        # Initialize the agent. The agent keeps the conversation history in `agent.messages`, and the
+        # conversation manager decides which messages are kept. NullConversationManager keeps all of them.
+        self.agent = Agent(
+            model=self._create_model(self.default_temperature, self.default_max_tokens),
+            system_prompt=self.default_system_message,
+            conversation_manager=NullConversationManager(),
+            callback_handler=None,
         )
-        
-        # Initialize memory
-        self.memory = ConversationBufferMemory(return_messages=True, memory_key="chat_history")
-        
-        # Create the prompt template and chain
-        self._update_prompt_and_chain()
         
         # Create UI components
         self._create_ui_components()
@@ -52,8 +48,17 @@ class SimpleChatbot:
         # Build the interface
         self._build_interface()
     
-    def _update_prompt_and_chain(self):
-        """Update the prompt template and chain based on current system message."""
+    def _create_model(self, temperature, max_tokens):
+        """Create the Bedrock model. A max_tokens of 0 (or None) means no limit."""
+        return BedrockModel(
+            model_id=self.model_id,
+            temperature=temperature,
+            max_tokens=max_tokens if max_tokens else None,
+            boto_session=boto3.Session(),
+        )
+    
+    def _update_system_prompt(self):
+        """Update the system prompt of the agent based on the current system message."""
         current_message = getattr(self, 'system_message_input', None)
         if current_message:
             system_message = current_message.value.strip()
@@ -63,15 +68,7 @@ class SimpleChatbot:
         if not system_message:
             system_message = self.default_system_message
         
-        # Create prompt template
-        self.prompt = ChatPromptTemplate.from_messages([
-            ("system", system_message),
-            ("placeholder", "{chat_history}"),
-            ("human", "{input}")
-        ])
-        
-        # Create the chain with prompt included
-        self.chain = self.prompt | self.llm | StrOutputParser()
+        self.agent.system_prompt = system_message
     
     def _create_ui_components(self):
         """Create all UI widgets for the chatbot."""
@@ -203,31 +200,15 @@ class SimpleChatbot:
         temp = self.temperature_slider.value
         tokens = self.max_tokens_slider.value if self.max_tokens_slider.value > 0 else None
         
-        # Update the LLM with new parameters
-        self.llm = ChatBedrockConverse(
-            model=self.model_id,
-            temperature=temp,
-            max_tokens=tokens,
-        )
+        # Update the model of the agent with the new parameters. The conversation history is kept.
+        self.agent.model.update_config(temperature=temp, max_tokens=tokens)
         
-        # Update the chain with the new LLM
-        self._update_prompt_and_chain()
+        # Update the system prompt of the agent
+        self._update_system_prompt()
     
-    def _conversation_chain(self, user_input):
-        """Process user input and get AI response."""
-        # Get chat history from memory
-        chat_history = self.memory.load_memory_variables({}).get("chat_history", "")
-        
-        # Generate response using the chain
-        response = self.chain.invoke({
-            "chat_history": chat_history,
-            "input": user_input
-        })
-        
-        # Save to memory
-        self.memory.save_context({"input": user_input}, {"output": response})
-        
-        return response
+    def _get_response(self, user_input):
+        """Process user input and get AI response. The agent adds both messages to its history."""
+        return str(self.agent(user_input))
     
     def _on_send_button_clicked(self, b):
         """Handle send button click event."""
@@ -247,7 +228,7 @@ class SimpleChatbot:
             
             try:
                 # Get response from the model
-                response = self._conversation_chain(user_input)
+                response = self._get_response(user_input)
                 
                 # Remove thinking indicator and display response
                 clear_output(wait=True)
@@ -266,7 +247,7 @@ class SimpleChatbot:
         """Handle clear button click event."""
         with self.output_area:
             clear_output()
-        self.memory.clear()
+        self.agent.messages.clear()
         # Display welcome message again
         with self.output_area:
             display(widgets.HTML(
@@ -277,7 +258,7 @@ class SimpleChatbot:
     def _on_update_params_clicked(self, b):
         """Handle update parameters button click event."""
         self._update_llm_params()
-        self._update_prompt_and_chain()  # Update prompt and chain with new system message
+        self._update_system_prompt()  # Update the system prompt of the agent
         with self.output_area:
             temp_value = self.temperature_slider.value
             max_tokens = self.max_tokens_slider.value if self.max_tokens_slider.value > 0 else "No limit"
@@ -307,7 +288,7 @@ class SimpleChatbot:
 
 class ChatbotwithPdfSupport:
     """
-    A chatbot class using AWS Bedrock and LangChain with ability to chat with documents.
+    A chatbot class using AWS Bedrock and Strands Agents with ability to chat with documents.
     
     This class creates a user-friendly chatbot interface with:
     - System message customization
@@ -333,18 +314,14 @@ class ChatbotwithPdfSupport:
         self.pdf_content = None
         self.pdf_filename = None
         
-        # Initialize LLM
-        self.llm = ChatBedrockConverse(
-            model=self.model_id,
-            temperature=self.default_temperature,
-            max_tokens=None if default_max_tokens == 0 else default_max_tokens
+        # Initialize the agent. The agent keeps the conversation history in `agent.messages`, and the
+        # conversation manager decides which messages are kept. NullConversationManager keeps all of them.
+        self.agent = Agent(
+            model=self._create_model(self.default_temperature, self.default_max_tokens),
+            system_prompt=self.default_system_message,
+            conversation_manager=NullConversationManager(),
+            callback_handler=None,
         )
-        
-        # Initialize memory
-        self.memory = ConversationBufferMemory(return_messages=True, memory_key="chat_history")
-        
-        # Create the prompt template and chain
-        self._update_prompt_and_chain()
         
         # Create UI components
         self._create_ui_components()
@@ -355,8 +332,17 @@ class ChatbotwithPdfSupport:
         # Build the interface
         self._build_interface()
     
-    def _update_prompt_and_chain(self):
-        """Update the prompt template and chain based on current system message and PDF content."""
+    def _create_model(self, temperature, max_tokens):
+        """Create the Bedrock model. A max_tokens of 0 (or None) means no limit."""
+        return BedrockModel(
+            model_id=self.model_id,
+            temperature=temperature,
+            max_tokens=max_tokens if max_tokens else None,
+            boto_session=boto3.Session(),
+        )
+    
+    def _update_system_prompt(self):
+        """Update the system prompt of the agent based on the current system message and PDF content."""
         current_message = getattr(self, 'system_message_input', None)
         if current_message:
             system_message = current_message.value.strip()
@@ -366,23 +352,14 @@ class ChatbotwithPdfSupport:
         if not system_message:
             system_message = self.default_system_message
         
-        # Create prompt template based on whether PDF content is available
+        # Add the content of the PDF document to the system prompt, if there is one
         if self.pdf_content:
-            self.prompt = ChatPromptTemplate.from_messages([
-                ("system", system_message),
-                ("system", "The user has uploaded a PDF document. Here is the content of that document:\n\n{pdf_content}\n\nPlease refer to this document when answering questions about it."),
-                ("placeholder", "{chat_history}"),
-                ("human", "{input}")
-            ])
-        else:
-            self.prompt = ChatPromptTemplate.from_messages([
-                ("system", system_message),
-                ("placeholder", "{chat_history}"),
-                ("human", "{input}")
-            ])
+            system_message += (
+                "\n\nThe user has uploaded a PDF document. Here is the content of that document:\n\n"
+                f"{self.pdf_content}\n\nPlease refer to this document when answering questions about it."
+            )
         
-        # Create the chain with prompt included
-        self.chain = self.prompt | self.llm | StrOutputParser()
+        self.agent.system_prompt = system_message
     
     def _create_ui_components(self):
         """Create all UI widgets for the chatbot."""
@@ -541,15 +518,11 @@ class ChatbotwithPdfSupport:
         temp = self.temperature_slider.value
         tokens = self.max_tokens_slider.value if self.max_tokens_slider.value > 0 else None
         
-        # Update the LLM with new parameters
-        self.llm = ChatBedrockConverse(
-            model=self.model_id,
-            temperature=temp,
-            max_tokens=tokens,
-        )
+        # Update the model of the agent with the new parameters. The conversation history is kept.
+        self.agent.model.update_config(temperature=temp, max_tokens=tokens)
         
-        # Update the chain with the new LLM
-        self._update_prompt_and_chain()
+        # Update the system prompt of the agent
+        self._update_system_prompt()
     
     def _extract_text_from_pdf(self, pdf_data):
         """Extract text from PDF data (limited to first 3 pages)."""
@@ -594,8 +567,8 @@ class ChatbotwithPdfSupport:
             # Enable the clear PDF button
             self.clear_pdf_button.disabled = False
             
-            # Update the prompt template to include PDF content
-            self._update_prompt_and_chain()
+            # Update the system prompt to include the PDF content
+            self._update_system_prompt()
             
             # Show notification in chat
             with self.output_area:
@@ -618,8 +591,8 @@ class ChatbotwithPdfSupport:
         # Clear the file upload widget
         self.pdf_upload.value = ()
         
-        # Update the prompt template to remove PDF content
-        self._update_prompt_and_chain()
+        # Update the system prompt to remove the PDF content
+        self._update_system_prompt()
         
         # Show notification in chat
         with self.output_area:
@@ -627,28 +600,9 @@ class ChatbotwithPdfSupport:
                 f"<div style='{self.system_style}'>PDF document removed</div>"
             ))
     
-    def _conversation_chain(self, user_input):
-        """Process user input and get AI response."""
-        # Get chat history from memory
-        chat_history = self.memory.load_memory_variables({}).get("chat_history", "")
-        
-        # Prepare input variables
-        input_vars = {
-            "chat_history": chat_history,
-            "input": user_input
-        }
-        
-        # Add PDF content if available
-        if self.pdf_content:
-            input_vars["pdf_content"] = self.pdf_content
-        
-        # Generate response using the chain
-        response = self.chain.invoke(input_vars)
-        
-        # Save to memory
-        self.memory.save_context({"input": user_input}, {"output": response})
-        
-        return response
+    def _get_response(self, user_input):
+        """Process user input and get AI response. The agent adds both messages to its history."""
+        return str(self.agent(user_input))
     
     def _on_send_button_clicked(self, b):
         """Handle send button click event."""
@@ -668,7 +622,7 @@ class ChatbotwithPdfSupport:
             
             try:
                 # Get response from the model
-                response = self._conversation_chain(user_input)
+                response = self._get_response(user_input)
                 
                 # Remove thinking indicator and display response
                 clear_output(wait=True)
@@ -687,7 +641,7 @@ class ChatbotwithPdfSupport:
         """Handle clear button click event."""
         with self.output_area:
             clear_output()
-        self.memory.clear()
+        self.agent.messages.clear()
         # Display welcome message again
         with self.output_area:
             welcome_message = "Hello! I'm a chatbot capable of chatting with your document."
@@ -703,7 +657,7 @@ class ChatbotwithPdfSupport:
     def _on_update_params_clicked(self, b):
         """Handle update parameters button click event."""
         self._update_llm_params()
-        self._update_prompt_and_chain()  # Update prompt and chain with new system message
+        self._update_system_prompt()  # Update the system prompt of the agent
         with self.output_area:
             temp_value = self.temperature_slider.value
             max_tokens = self.max_tokens_slider.value if self.max_tokens_slider.value > 0 else "No limit"
