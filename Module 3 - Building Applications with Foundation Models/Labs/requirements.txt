@@ -11,7 +11,7 @@ pypdf==6.21.4
 PyMuPDF==1.25.5
 PyPDF2==3.0.1
 ddgs
-unstructured==0.24.0
+unstructured==0.24.1
 urllib3>=2
 pypdfium2
 xmltodict
