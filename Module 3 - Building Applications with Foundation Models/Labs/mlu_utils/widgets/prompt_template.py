@@ -1,9 +1,10 @@
 import re
 import ipywidgets as widgets
 from IPython.display import display, Markdown, HTML
-from langchain_core.prompts import PromptTemplate
+from mlu_utils.strands_utils import ask_llm
 
-def create_prompt_interface(bedrock_llm):
+def create_prompt_interface(bedrock_model):
+    """Interactive prompt template tool. `bedrock_model` is a Strands model (e.g. BedrockModel)."""
     # Apply minimal but effective styling
     display(HTML("""
     <style>
@@ -93,16 +94,15 @@ def create_prompt_interface(bedrock_llm):
     def generate_response(_):
         try:
             # Format the prompt with variable values
-            template = PromptTemplate.from_template(template_area.value)
             values = {var: widget.value for var, widget in var_widgets.items()}
-            formatted_prompt = template.format(**values)
+            formatted_prompt = template_area.value.format(**values)
             
             with output:
                 output.clear_output()
                 display(HTML("<div style='color:#3498db; font-weight:500;'>Generating response...</div>"))
                 
                 # Get response from LLM
-                response = bedrock_llm.invoke(formatted_prompt).content
+                response = ask_llm(bedrock_model, formatted_prompt)
                 
                 # Display results
                 output.clear_output()

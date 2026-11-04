@@ -1,10 +1,15 @@
 import ipywidgets as widgets
 from IPython.display import display, HTML, Markdown
 import pandas as pd
-from langchain_core.output_parsers import StrOutputParser
-from langchain_core.prompts import PromptTemplate
+from mlu_utils.strands_utils import ask_llm
 
-def create_rag_comparison_ui(retriever, bedrock_llm):
+def create_rag_comparison_ui(retriever, model):
+    """Compare the response of a RAG solution with the response of the LLM alone.
+
+    Args:
+        retriever: A retriever with an `invoke(query)` method that returns documents with a `page_content`.
+        model: The Strands model (for example a BedrockModel) used to generate the responses.
+    """
     # Apply styling
     display(HTML("""
     <style>
@@ -42,13 +47,7 @@ def create_rag_comparison_ui(retriever, bedrock_llm):
     Answer:
     """
     
-    # Create prompt templates
-    qa_prompt_template = PromptTemplate.from_template(qa_template)
-    llm_prompt_template = PromptTemplate.from_template(llm_template)
-    
-    # Define the chains
-    retrieval_qa_chain = qa_prompt_template | bedrock_llm | StrOutputParser()
-    llm_chain = llm_prompt_template | bedrock_llm | StrOutputParser()
+    # The templates are filled in with str.format, and each prompt is sent to the model with a new Strands Agent
     
     # Create widgets
     query_input = widgets.Textarea(
@@ -107,16 +106,13 @@ def create_rag_comparison_ui(retriever, bedrock_llm):
             with output_area:
                 display(HTML("<div style='color:#7f8c8d;'>Generating RAG response...</div>"))
             
-            rag_response = retrieval_qa_chain.invoke({
-                "question": query,
-                "context": docs_content
-            })
+            rag_response = ask_llm(model, qa_template.format(question=query, context=docs_content))
             
             # Generate LLM response
             with output_area:
                 display(HTML("<div style='color:#7f8c8d;'>Generating LLM response...</div>"))
             
-            llm_response = llm_chain.invoke({'question': query})
+            llm_response = ask_llm(model, llm_template.format(question=query))
             
             # Display results
             with output_area:

@@ -1,8 +1,13 @@
 import ipywidgets as widgets
 from IPython.display import display, HTML, Markdown
 import json
-from langchain_core.output_parsers import JsonOutputParser
-from langchain_core.prompts import PromptTemplate
+from mlu_utils.strands_utils import ask_llm, parse_json_response
+
+# Instructions inserted wherever the template contains {format_instructions}
+FORMAT_INSTRUCTIONS = (
+    "Return the output as a single valid JSON object. "
+    "Do not include any explanation, comments, or Markdown code fences."
+)
 
 class JsonParserUI:
     def __init__(self, llm):
@@ -10,10 +15,9 @@ class JsonParserUI:
         Initialize the JSON Parser UI
         
         Args:
-            llm: LLM to invoke
+            llm: Strands model (e.g. BedrockModel) to invoke
         """
         self.llm = llm
-        self.parser = JsonOutputParser()
         self._apply_styling()
         self._create_widgets()
         self._setup_layout()
@@ -124,10 +128,10 @@ class JsonParserUI:
     def _setup_layout(self):
         """Create the main layout"""
         self.main_box = widgets.VBox([
-            widgets.HTML(value="<h2 class='section-header'>JSONOutputParser Interactive Demo</h2>"),
+            widgets.HTML(value="<h2 class='section-header'>JSON Output Parsing Interactive Demo</h2>"),
             widgets.HTML(value="<div style='font-weight:500; margin:5px 0'>Template</div>"),
             self.template_area,
-            widgets.HTML(value="<div class='instruction-text'>Use <code>{format_instructions}</code> where you want the parser instructions to appear.</div>"),
+            widgets.HTML(value="<div class='instruction-text'>Use <code>{format_instructions}</code> where you want the JSON formatting instructions to appear.</div>"),
             widgets.HBox([self.generate_button], 
                         layout=widgets.Layout(
                             display='flex', 
@@ -197,17 +201,14 @@ class JsonParserUI:
             display(HTML("<div style='color:#3498db; font-weight:500;'>Generating JSON from template...</div>"))
             
             try:
-                # Create the prompt with the template
-                prompt = PromptTemplate(
-                    template=self.template_area.value,
-                    input_variables=[],
-                    partial_variables={"format_instructions": self.parser.get_format_instructions()}
+                # Fill the {format_instructions} placeholder with plain Python string formatting
+                formatted_prompt = self.template_area.value.format(
+                    format_instructions=FORMAT_INSTRUCTIONS
                 )
                 
-                # Generate output using the provided LLM function
-                formatted_prompt = prompt.format()
-                output = self.llm.invoke(formatted_prompt).content
-                result = self.parser.parse(output)
+                # Generate output with a Strands agent and parse the JSON text
+                output = ask_llm(self.llm, formatted_prompt)
+                result = parse_json_response(output)
                 
                 # Display the formatted JSON
                 self.json_view.value = self._format_json_for_display(result)

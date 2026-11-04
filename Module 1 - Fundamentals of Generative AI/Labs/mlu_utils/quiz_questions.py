@@ -262,11 +262,11 @@ lab2a_question1 = Quiz(
 
 lab2b_question1 = Quiz(
     question={
-        "question": "Which module was used for memory in the conversational chain?", "options" : [
-            "PromptTemplate",
-            "BedrockLLM",
-            "ConversationBufferMemory",
-            "ConversationChain",
+        "question": "Where does a Strands Agent keep the memory of the conversation between calls?", "options" : [
+            "The system_prompt",
+            "The BedrockModel",
+            "The agent.messages list",
+            "A @tool function",
         ],
         "correctIndex": 2,
     }

@@ -7,13 +7,8 @@ import json
 from IPython.display import JSON
 import os, shutil
 import time
-from langchain_core.output_parsers import StrOutputParser
-from langchain_core.prompts import ChatPromptTemplate
-from langchain_core.messages import HumanMessage
-from langchain_aws.chat_models import ChatBedrock
-from langchain_aws import ChatBedrockConverse
-from langchain_core.tools import tool
-from langgraph.prebuilt import create_react_agent
+from strands import Agent, tool
+from strands.models import BedrockModel
 import boto3
 
 NOVA_PRO_MODEL_ID = "amazon.nova-pro-v1:0"
@@ -120,12 +115,10 @@ def generate_perturbed_prompts(base_sent):
     except Exception as e:
         raise Exception(f"Failed to generate a response from the LLM for sentence '{base_sent}': {str(e)}")
 
-    if str(type(response)) == "<class 'langchain_core.messages.ai.AIMessage'>":
-        response = response.content
-        response = response.strip()
-        print(f" Base_sentence :: {base_sent}")
-        print(f"\n LLM paraphrased sentence ==> {response} ")
-        paraphrased_sent = response
+    response = response.strip()
+    print(f" Base_sentence :: {base_sent}")
+    print(f"\n LLM paraphrased sentence ==> {response} ")
+    paraphrased_sent = response
     return paraphrased_sent
 
 
@@ -142,10 +135,7 @@ def find_number_of_times_no_financial_advice(response_outputs):
         except Exception as e:
             raise Exception(f"Failed to generate a response from the LLM: {str(e)}")
 
-        if str(type(response)) == "<class 'langchain_core.messages.ai.AIMessage'>":
-            response = response.content
-            response = response.strip()
-            print(f"\n LLM response to detect financial advice ==> {response} ")
+        print(f"\n LLM response to detect financial advice ==> {response} ")
         if "no" in response.lower():
             number_of_times_no_financial_advice += 1
         print(f"number_of_times_no_financial_advice >> {number_of_times_no_financial_advice}\n")
@@ -153,66 +143,81 @@ def find_number_of_times_no_financial_advice(response_outputs):
     return number_of_times_no_financial_advice
 
 
-class AgentExecutorCompat:
-    """Wrapper around create_react_agent to maintain the old .invoke({"input": ...}) -> {"output": ...} interface."""
+def create_agent_with_and_without_guardrails(model_id, guardrailId, guardrailVersion="2"):
+    """Create two identical Strands agents, one with and one without an Amazon Bedrock guardrail.
 
-    def __init__(self, agent):
-        self._agent = agent
+    The only difference between the agents is the guardrail configuration of the BedrockModel.
 
-    def invoke(self, inputs):
-        user_input = inputs.get("input", "")
-        if isinstance(user_input, set):
-            user_input = next(iter(user_input))
-        result = self._agent.invoke({"messages": [("human", str(user_input))]})
-        # Extract the final AI message content
-        messages = result.get("messages", [])
-        output = ""
-        for msg in reversed(messages):
-            if hasattr(msg, "content") and msg.type == "ai":
-                output = msg.content
-                break
-        return {"output": output}
+    Args:
+        model_id: Amazon Bedrock model ID used by both agents.
+        guardrailId: ID of the Amazon Bedrock guardrail to apply to the second agent.
+        guardrailVersion: Version of the guardrail to apply.
 
-
-def create_agent_with_and_without_guardrails(model_id, guardrailId):
+    Returns:
+        A tuple (agent_with_guardrails, agent_no_guardrails).
+    """
     @tool
     def multiply(x: float, y: float) -> float:
-        """Multiply 'x' times 'y'."""
+        """Multiply 'x' times 'y'.
+
+        Args:
+            x: First number.
+            y: Second number.
+        """
         return x * y
 
     @tool
     def exponentiate(x: float, y: float) -> float:
-        """Raise 'x' to the 'y'."""
+        """Raise 'x' to the 'y'.
+
+        Args:
+            x: The base.
+            y: The exponent.
+        """
         return x**y
 
     @tool
     def add(x: float, y: float) -> float:
-        """Add 'x' and 'y'."""
+        """Add 'x' and 'y'.
+
+        Args:
+            x: First number.
+            y: Second number.
+        """
         return x + y
 
     tools = [multiply, exponentiate, add]
 
     # Agent without guardrails
-    chat_no_guardrails = ChatBedrockConverse(
-        model=model_id,
+    model_no_guardrails = BedrockModel(
+        model_id=model_id,
         temperature=0.0,
         max_tokens=1000,
+        boto_session=boto3.Session(),
     )
-    agent_no_guardrails = create_react_agent(chat_no_guardrails, tools)
-    agent_executor_no_guardrails = AgentExecutorCompat(agent_no_guardrails)
+    agent_no_guardrails = Agent(model=model_no_guardrails, tools=tools, callback_handler=None)
 
-    # Agent with guardrails
-    chat_with_guardrails = ChatBedrockConverse(
-        model=model_id,
+    # Agent with guardrails: Bedrock applies the guardrail to the input and the output of every model call
+    model_with_guardrails = BedrockModel(
+        model_id=model_id,
         temperature=0.0,
         max_tokens=1000,
-        guardrails={
-            "guardrailIdentifier": guardrailId,
-            "guardrailVersion": "2",
-            "trace": "enabled",
-        },
+        boto_session=boto3.Session(),
+        guardrail_id=guardrailId,
+        guardrail_version=guardrailVersion,
+        guardrail_trace="enabled",
     )
-    agent_with_guardrails = create_react_agent(chat_with_guardrails, tools)
-    agent_executor_with_guardrails = AgentExecutorCompat(agent_with_guardrails)
+    agent_with_guardrails = Agent(model=model_with_guardrails, tools=tools, callback_handler=None)
 
-    return agent_executor_with_guardrails, agent_executor_no_guardrails
+    return agent_with_guardrails, agent_no_guardrails
+
+
+def invoke_agent(agent, prompt):
+    """Run one independent prompt on a Strands agent and return the answer as text.
+
+    A Strands agent keeps the conversation in `agent.messages`. The messages are cleared first, so that
+    every prompt is evaluated on its own and a previous (possibly blocked) turn cannot influence the result.
+    """
+    agent.messages.clear()
+    result = agent(str(prompt))
+    return str(result).strip()
