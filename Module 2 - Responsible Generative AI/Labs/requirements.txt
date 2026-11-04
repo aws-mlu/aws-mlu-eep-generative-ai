@@ -2,5 +2,5 @@ transformers
 torch
 boto3>=1.42.42
 botocore>=1.42.42
-datasets==3.6.0
+datasets==5.1.0
 strands-agents==1.63.0
