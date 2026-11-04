@@ -7,7 +7,7 @@ langchain-experimental==0.4.2
 strands-agents==1.63.0
 strands-agents-tools==0.8.12
 wikipedia==1.4.0
-pypdf==6.16.1
+pypdf==6.21.4
 PyMuPDF==1.25.5
 PyPDF2==3.0.1
 ddgs
