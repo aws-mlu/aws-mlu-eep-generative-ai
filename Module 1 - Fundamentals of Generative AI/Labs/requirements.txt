@@ -1,5 +1,5 @@
 pypdfium2==4.30.0
 igraph==0.11.8
 plotly==6.0.1
-pillow==12.3.0
+pillow==13.0.0
 strands-agents==1.63.0
